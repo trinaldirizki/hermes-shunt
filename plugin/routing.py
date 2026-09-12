@@ -14,12 +14,9 @@ Semantics ported from spotify/portal-ai-plugins (Apache-2.0):
 from __future__ import annotations
 
 import os
-import re
+import shlex
 
 READ_CMDS = ("cat", "head", "tail", "less", "more")
-
-_BARE_READ_RE = re.compile(r"^(cat|head|tail|less|more)\s+(.*)$")
-_FLAG_RE = re.compile(r"^-+")
 
 
 def _count_lines(path: str) -> int:
@@ -55,9 +52,9 @@ def should_block_read(path, offset, limit, min_lines: int):
 
 def _first_operand(args: list[str]):
     for a in args:
-        if _FLAG_RE.match(a):
+        if a.startswith("-"):
             continue
-        return a.strip().strip('"').strip("'")
+        return a
     return None
 
 
@@ -71,10 +68,14 @@ def extract_bash_read_target(command: str):
         return None
     if "|" in command or ">" in command:
         return None
-    m = _BARE_READ_RE.match(command.strip())
-    if not m:
+    try:
+        tokens = shlex.split(command)
+    except ValueError:
+        # unbalanced quotes — treat as unparseable, allow through
         return None
-    operand = _first_operand(m.group(2).split())
+    if not tokens or tokens[0] not in READ_CMDS:
+        return None
+    operand = _first_operand(tokens[1:])
     return operand or None
 
 
