@@ -220,3 +220,14 @@ and the "How it works" diagrams above.
 
 Apache-2.0. Mode instruction texts and routing semantics ported from
 spotify/portal-ai-plugins (Apache-2.0) — see NOTICE.
+
+## v0.1.1 — cumulative gate (R2) + first-turn primer (R3)
+
+- `SHUNT_CUMULATIVE_GATE` (default on; `0` disables): per-session tracking
+  of targeted-read lines per file — further targeted reads block once prior
+  cumulative reads exceed the threshold. Any single targeted read always
+  passes (upstream semantics preserved; the ported eval matrix runs with it
+  scoped off).
+- First-turn `pre_llm_call` primer instructs delegation before the first
+  big read, making `bulk_read` the default path (A/B measured 3/3 adoption,
+  54–87ontext reduction vs un-shunted control on real multi-file tasks).
