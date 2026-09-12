@@ -1,0 +1,2 @@
+{"ts": "2026-09-12T12:35:44", "mode": "bulk-reader", "model": "glm-5.2", "prompt_tokens": 500, "completion_tokens": 50, "corpus_tokens": 4000}
+{"ts": "2026-09-12T12:35:44", "mode": "code-writer", "model": "glm-5.2", "prompt_tokens": 300, "completion_tokens": 30, "corpus_tokens": 2000}
