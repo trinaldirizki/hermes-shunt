@@ -33,8 +33,13 @@ def line_count(path: str) -> int:
 
 
 def should_block_read(path, offset, limit, min_lines: int):
-    """Return (blocked, message). Ports hooks/check-file-size."""
-    if offset or limit:
+    """Return (blocked, message). Ports hooks/check-file-size.
+
+    Presence test, not truthiness: offset=0 / limit=0 count as targeted
+    reads (upstream ``[ -n "$offset" ]`` string-nonempty semantics — its
+    eval cases 13/14 document this as intended bypass behavior).
+    """
+    if (offset is not None and offset != "") or (limit is not None and limit != ""):
         return False, ""
     if not path or not os.path.isfile(path):
         return False, ""
