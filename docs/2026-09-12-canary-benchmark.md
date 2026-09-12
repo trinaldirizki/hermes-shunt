@@ -35,8 +35,9 @@ The savings are not single-call — they are:
 1. **Context-window**: 91–97% of the corpus never enters the orchestrator's
    window (measured above), and
 2. **Compounding**: the corpus stops re-riding every subsequent turn. At 5
-   turns, the large-file scenario avoids 12,048×5 − (350×5 + 13,290) ≈
-   **44,300 tokens (73%)**; multi-file avoids ≈ 24,300 (70%).
+   turns, the large-file scenario avoids 60,240 − (350×5 + 13,290) =
+   **45,200 tokens (75%)**; multi-file avoids 31,050 − (550×5 + 8,707) =
+   **19,593 (63%)**.
 
 Worker spend bills at deepseek-flash rates (~$0.3/M input ≈ well under a cent
 per call at these sizes) in a separate window, while orchestrator context
