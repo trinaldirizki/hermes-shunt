@@ -78,14 +78,23 @@ def check_corpus_limit(message: str, cfg: Config) -> int:
 
 
 def _usage_pair(usage) -> tuple[int, int]:
-    """Extract (prompt_tokens, completion_tokens) from a usage object that
-    may be a dict, an attribute object, or None."""
+    """Extract (input, output) token counts from a usage object.
+
+    Real Hermes shape: PluginLlmUsage with input_tokens/output_tokens
+    (agent/plugin_llm.py _extract_usage). Dicts accepted for tests and
+    OpenAI-shaped payloads (prompt_tokens/completion_tokens).
+    """
     if usage is None:
         return 0, 0
     if isinstance(usage, dict):
-        return int(usage.get("prompt_tokens", 0)), int(usage.get("completion_tokens", 0))
-    return (int(getattr(usage, "prompt_tokens", 0) or 0),
-            int(getattr(usage, "completion_tokens", 0) or 0))
+        inp = usage.get("prompt_tokens", 0) or usage.get("input_tokens", 0)
+        out = usage.get("completion_tokens", 0) or usage.get("output_tokens", 0)
+        return int(inp), int(out)
+    inp = (getattr(usage, "input_tokens", None)
+           or getattr(usage, "prompt_tokens", None) or 0)
+    out = (getattr(usage, "output_tokens", None)
+           or getattr(usage, "completion_tokens", None) or 0)
+    return int(inp), int(out)
 
 
 def delegate(ctx, cfg: Config, mode: Mode, message: str, purpose: str,

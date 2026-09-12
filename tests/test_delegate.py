@@ -244,8 +244,11 @@ class TestStats(unittest.TestCase):
             self.assertEqual(s["per_mode"], {"bulk-reader": 1, "code-writer": 1})
 
     def test_default_path_outside_repo(self):
-        # stats must NEVER land inside the plugin package (symlinked repo)
-        default = stats.stats_path()
+        # stats must NEVER land inside the plugin package (symlinked repo).
+        # conftest sets SHUNT_STATS_FILE for isolation — clear it to see the default.
+        with mock.patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("SHUNT_STATS_FILE", None)
+            default = stats.stats_path()
         self.assertIn(".hermes", default)
         self.assertNotIn("hermes-shunt/plugin", default)
 
