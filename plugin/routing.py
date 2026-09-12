@@ -47,10 +47,11 @@ def should_block_read(path, offset, limit, min_lines: int):
     if lines <= min_lines:
         return False, ""
     msg = (
-        f"File is {lines:,} lines (threshold: {min_lines}). "
-        "Call the bulk_read tool with a question and this path instead of "
-        "reading it directly. If you need exact content for an edit, re-read "
-        "with offset/limit for just the section."
+        f"File is {lines:,} lines (threshold: {min_lines}). Do not paginate "
+        "this file. Call the bulk_read tool with a question and this path — "
+        "the worker reads the file and returns a cited answer; the file never "
+        "enters your context. Use offset/limit reads only when you need exact "
+        "lines for an edit."
     )
     return True, msg
 
