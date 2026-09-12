@@ -1,5 +1,5 @@
 name: hermes-shunt
-version: "0.1.0"
+version: "0.1.1"
 description: >-
   Shunts I/O-heavy work (large file reads, boilerplate generation) to one-shot
   worker LLM calls via ctx.llm, so file corpora never enter the orchestrator's
