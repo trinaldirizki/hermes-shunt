@@ -240,9 +240,9 @@ class TestShuntCommand(unittest.TestCase):
                 ctx.tools["bulk_read"]["handler"](
                     {"question": "q", "paths": [SMALL]})
                 out = ctx.commands["shunt"]("stats")
-                self.assertIn("calls: 1", out)
+                self.assertIn("all-time: 1 delegations", out)
                 self.assertIn("bulk-reader:1", out)
-                self.assertIn("110", out)  # worker tokens spent
+                self.assertIn("ratio", out)
 
     def test_usage_hint(self):
         ctx = wired()

@@ -263,16 +263,7 @@ def register(ctx):
     def _shunt_cmd(raw):
         arg = (raw or "").strip()
         if arg in ("", "stats"):
-            s = stats.summarize()
-            if not s.get("calls"):
-                return "No delegations recorded yet."
-            per = ", ".join(f"{k}:{v}" for k, v in sorted(s["per_mode"].items()))
-            return (
-                f"calls: {s['calls']} ({per})\n"
-                f"worker tokens spent: {s['worker_tokens_spent']:,}\n"
-                f"orchestrator tokens avoided: "
-                f"{s['orchestrator_tokens_avoided']:,}"
-            )
+            return stats.format_report()
         return "Usage: /shunt stats"
 
     ctx.register_command(
