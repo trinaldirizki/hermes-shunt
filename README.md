@@ -29,18 +29,26 @@ hermes plugins enable hermes-shunt
 | `SHUNT_DISABLE_HOOK` | unset | `1` = kill-switch: disable blocking without uninstalling |
 
 Worker-model routing (e.g. to a cheap model) additionally requires the trust
-gates in `~/.hermes/config.yaml`:
+gates in `~/.hermes/config.yaml` (set via `hermes config set`, verified live):
 
 ```yaml
 plugins:
   entries:
     hermes-shunt:
-      allow_model_override: true
-      allowed_models: [deepseek-chat]
+      llm:
+        allow_provider_override: true
+        allowed_providers: [deepseek]
+        allow_model_override: true
+        allowed_models: [deepseek-chat]
 ```
 
-Without the gates, delegation runs on the active model (zero-config) and
-routing raises `PluginLlmTrustError`.
+Without the gates, routing raises a fail-loud error naming the exact config
+key (`Plugin 'hermes-shunt' cannot override the provider — set
+plugins.entries.hermes-shunt.llm.allow_provider_override to true`). With the
+gates + `SHUNT_WORKER_MODEL`/`SHUNT_WORKER_PROVIDER`, delegation bills to the
+worker: verified live — stats recorded model `deepseek-flash` (DeepSeek's
+current serving alias for the `deepseek-chat` endpoint), 9,319 prompt / 20
+completion tokens.
 
 ## /shunt stats
 
@@ -54,6 +62,23 @@ calls: 2 (bulk-reader:2)
 worker tokens spent: 9,553
 orchestrator tokens avoided: 17,672
 ```
+
+## Benchmark
+
+Measured on public corpora (upstream `websocket-handler.ts` fixture +
+[trinaldirizki/devkit](https://github.com/trinaldirizki/devkit)), deepseek
+worker — full method + numbers in
+[docs/2026-09-12-canary-benchmark.md](docs/2026-09-12-canary-benchmark.md):
+
+| Scenario | Context saved | Worker one-shot |
+|---|---|---|
+| Single large file (602 L) | 97% | 13,290 tok |
+| Multi-file comprehension (4 files) | 91% | 8,707 tok |
+| Code-write (pattern-following module) | generation offloaded | 3,593 tok |
+
+Savings are context-window + multi-turn compounding (~70–73% over a 5-turn
+session), not single-call totals — see the report's "honest trade" section.
+
 
 ## What does not get delegated
 
