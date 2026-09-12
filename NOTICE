@@ -1,0 +1,23 @@
+hermes-shunt
+Copyright 2026 Trinaldi Rizki Permana
+
+This product includes software and content developed as part of
+spotify/portal-ai-plugins (Copyright Spotify AB, Apache License 2.0):
+
+- Worker "mode" instruction texts (bulk-reader, code-writer) copied from
+  plugins/shunt/README.md
+- Routing-gate semantics (line threshold, targeted-read passthrough,
+  bash-read detection allow-rules) ported from plugins/shunt/hooks/
+- Corpus message format (<file path="..."> blocks) and fail-loud path
+  validation ported from plugins/shunt/scripts/
+- Evaluation case matrix ported from plugins/shunt/evals/
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations
+under the License.
