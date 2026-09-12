@@ -10,4 +10,4 @@ license: Apache-2.0
 homepage: https://github.com/trinaldirizki/hermes-shunt
 keywords: [token-optimization, delegation, bulk-read, context-window]
 provides_tools: [bulk_read, code_write]
-provides_hooks: [pre_tool_call]
+provides_hooks: [pre_tool_call, pre_llm_call]

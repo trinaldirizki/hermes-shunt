@@ -40,6 +40,8 @@ def should_block_read(path, offset, limit, min_lines: int):
     eval cases 13/14 document this as intended bypass behavior).
     """
     if (offset is not None and offset != "") or (limit is not None and limit != ""):
+        # targeted read — R2 cumulative gate decides (caller falls back to
+        # allow when cumulative tracking is disabled)
         return False, ""
     if not path or not os.path.isfile(path):
         return False, ""

@@ -13,15 +13,43 @@ Layers (upstream structure):
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
-from . import config, delegate, modes, routing, stats
+from . import config, delegate, modes, readstate, routing, stats
 
 _SKILLS_DIR = Path(__file__).parent / "skills"
+
+_PRIMER = (
+    "hermes-shunt is active: for any file over ~350 lines, do not read or "
+    "paginate it — call the bulk_read tool with a question and the path(s); "
+    "a worker model reads the files and returns a cited answer without the "
+    "file entering your context. Use targeted offset/limit reads only for "
+    "exact lines you need to edit."
+)
 
 
 def _error(msg: str) -> str:
     return json.dumps({"error": msg})
+
+
+def _cumulative_on() -> bool:
+    return os.environ.get("SHUNT_CUMULATIVE_GATE", "1") != "0"
+
+
+def _targeted_est_lines(path, offset, limit) -> int | None:
+    """Estimate how many lines a targeted read pulls. None = untracked."""
+    try:
+        off = int(offset) if offset not in (None, "") else 0
+        lim = int(limit) if limit not in (None, "") else None
+    except (TypeError, ValueError):
+        return None
+    if lim == 0:
+        return None  # limit=0: nothing read
+    total = routing.line_count(path)
+    if lim is None:
+        return max(0, min(2000, total - off))  # read_file default limit 2000
+    return max(0, min(lim, total - off))
 
 
 def register(ctx):
@@ -36,6 +64,33 @@ def register(ctx):
         if cfg.disable_hook:
             return None
         if tool_name == "read_file":
+            path = args.get("path")
+            targeted = (args.get("offset") is not None and args.get("offset") != "") or \
+                       (args.get("limit") is not None and args.get("limit") != "")
+            if targeted and os.path.isfile(path or ""):
+                # R2 cumulative gate: accumulate + check before deciding
+                est = _targeted_est_lines(path, args.get("offset"), args.get("limit"))
+                prior = readstate.cumulative(kwargs.get("session_id"),
+                                             os.path.abspath(path))
+                if est is not None:
+                    readstate.accumulate(kwargs.get("session_id"),
+                                         os.path.abspath(path), est)
+                # R2: block only when PRIOR cumulative reads exceed the
+                # threshold — any single targeted read passes (upstream
+                # semantics, eval cases 7-9); pagination beyond
+                # threshold+chunk is what gets stopped.
+                if prior > cfg.min_lines and _cumulative_on():
+                    lines_total = routing.line_count(path)
+                    return {"action": "block", "message": (
+                        f"Cumulative targeted reads of this file now exceed "
+                        f"{cfg.min_lines} lines (already read ~{prior}, this "
+                        f"chunk ~{est or 0}, file is {lines_total:,} lines). "
+                        "Do not paginate this file further. Call the "
+                        "bulk_read tool with a question and this path — the "
+                        "worker reads it and returns a cited answer. Use "
+                        "offset/limit only for the exact lines you need to edit."
+                    )}
+                return None  # first/under-threshold targeted read: allow
             blocked, reason = routing.should_block_read(
                 args.get("path"), args.get("offset"), args.get("limit"),
                 cfg.min_lines,
@@ -51,6 +106,14 @@ def register(ctx):
         return None
 
     ctx.register_hook("pre_tool_call", shunt_gate)
+
+    # ------------------------------------------------ layer 0: R3 primer
+    def shunt_primer(session_id, user_message, is_first_turn, **kwargs):
+        if is_first_turn:
+            return {"context": _PRIMER}
+        return None
+
+    ctx.register_hook("pre_llm_call", shunt_primer)
 
     # ------------------------------------------------ layer 2: tools
     _bulk_schema = {

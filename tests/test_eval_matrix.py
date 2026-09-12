@@ -119,7 +119,12 @@ class TestReadHookMatrix(unittest.TestCase):
                 if limit is not None:
                     args["limit"] = limit
 
-                env = {}
+                # The ported matrix asserts upstream's STATELESS semantics
+                # verbatim; R2 (stateful cumulative gate) is a deliberate
+                # extension that would accumulate cases 7/9 into 8 (same
+                # file). Disable R2 for this matrix only (scoped via
+                # patch.dict); R2 behavior is covered by test_v011.py.
+                env = {"SHUNT_CUMULATIVE_GATE": "0"}
                 if env_min is not None:
                     env["SHUNT_MIN_LINES"] = env_min
                 with mock.patch.dict(os.environ, env, clear=False):
