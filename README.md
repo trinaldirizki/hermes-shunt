@@ -132,6 +132,19 @@ ln -s ~/hermes-shunt/plugin ~/.hermes/plugins/hermes-shunt
 hermes plugins enable hermes-shunt
 ```
 
+## Install (pinned, for third parties)
+
+Treat this repo as untrusted third-party code — read SECURITY.md first.
+Install a specific immutable commit, not a branch:
+
+```bash
+hermes plugins install trinaldirizki/hermes-shunt --ref <full-40-char-commit>
+```
+
+Hermes verifies `HEAD` exactly matches the requested SHA and records the
+revision in your profile. Re-audit and re-pin on every update; never install
+from a moving branch for org use.
+
 ## Configuration
 
 | Variable | Default | Purpose |
