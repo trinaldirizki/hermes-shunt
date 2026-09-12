@@ -42,6 +42,19 @@ plugins:
 Without the gates, delegation runs on the active model (zero-config) and
 routing raises `PluginLlmTrustError`.
 
+## /shunt stats
+
+In-session slash command (interactive CLI/TUI and gateway sessions —
+one-shot `hermes chat -q` has no slash dispatch, so `/shunt` reaches the
+model as plain text there):
+
+```
+/shunt stats
+calls: 2 (bulk-reader:2)
+worker tokens spent: 9,553
+orchestrator tokens avoided: 17,672
+```
+
 ## What does not get delegated
 
 - Debugging — requires the orchestrator's reasoning, not a summary
