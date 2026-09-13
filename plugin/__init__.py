@@ -25,7 +25,11 @@ _PRIMER = (
     "paginate it — call the bulk_read tool with a question and the path(s); "
     "a worker model reads the files and returns a cited answer without the "
     "file entering your context. Use targeted offset/limit reads only for "
-    "exact lines you need to edit."
+    "exact lines you need to edit. For pattern-following generation (tests, "
+    "stubs, config, docstrings — anything >80% predictable from a reference "
+    "file), call code_write with a spec and the reference path instead of "
+    "generating inline; the worker writes the file to disk and only a short "
+    "summary enters your context."
 )
 
 

@@ -138,6 +138,8 @@ class TestPrimer(unittest.TestCase):
         self.assertIsNotNone(out)
         ctx = out["context"] if isinstance(out, dict) else out
         self.assertIn("bulk_read", ctx)
+        # R3b (v0.1.2): primer must also steer code_write adoption
+        self.assertIn("code_write", ctx)
 
     def test_later_turns_silent(self):
         self.hooks["pre_llm_call"](session_id="s9", user_message="hi",
